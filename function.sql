@@ -9,7 +9,7 @@
 --  *  *  *  *  *
 -- 支持的符号： , - / ?(日和星期)
 -- 不支持同时出现多个符号
-create or replace function hymn.get_next_execution_time(cron text, last_exec_time timestamptz) returns timestamptz
+create or replace function get_next_execution_time(cron text, last_exec_time timestamptz) returns timestamptz
     language plpgsql
     immutable as
 $$
@@ -73,12 +73,12 @@ begin
         if loop_count > 100 then
             raise exception '无法找到下一次执行时间';
         end if;
-        a_week_day_arr = hymn.filter_arr_in_range(
-                hymn.parse_cron_sub_expr_and_get_range('day_of_week', expr_dow, 0, 6),
+        a_week_day_arr = filter_arr_in_range(
+                parse_cron_sub_expr_and_get_range('day_of_week', expr_dow, 0, 6),
                 null, null
             );
-        a_month_arr = hymn.filter_arr_in_range(
-                hymn.parse_cron_sub_expr_and_get_range('month', expr_month, 1, 12),
+        a_month_arr = filter_arr_in_range(
+                parse_cron_sub_expr_and_get_range('month', expr_month, 1, 12),
                 l_month, null
             );
         if array_length(a_month_arr, 1) is null then
@@ -92,8 +92,8 @@ begin
             l_minute = 0;
             continue;
         end if;
-        a_day_arr = hymn.filter_arr_in_range(
-                hymn.parse_cron_sub_expr_and_get_range('day', expr_day, 1, 31),
+        a_day_arr = filter_arr_in_range(
+                parse_cron_sub_expr_and_get_range('day', expr_day, 1, 31),
                 l_day,
 --             取当前月份
                 extract(days FROM date_trunc('month', make_date(n_year, a_month_arr[0], 1)) +
@@ -107,8 +107,8 @@ begin
             continue;
         end if;
 
-        a_hour_arr = hymn.filter_arr_in_range(
-                hymn.parse_cron_sub_expr_and_get_range('hour', expr_hour, 0, 23),
+        a_hour_arr = filter_arr_in_range(
+                parse_cron_sub_expr_and_get_range('hour', expr_hour, 0, 23),
                 l_hour, null
             );
         if array_length(a_hour_arr, 1) is null then
@@ -117,8 +117,8 @@ begin
             l_minute = 0;
             continue;
         end if;
-        a_minute_arr = hymn.filter_arr_in_range(
-                hymn.parse_cron_sub_expr_and_get_range('minute', expr_minute, 0, 59),
+        a_minute_arr = filter_arr_in_range(
+                parse_cron_sub_expr_and_get_range('minute', expr_minute, 0, 59),
                 l_minute, null
             );
         if array_length(a_minute_arr, 1) is null then
@@ -153,10 +153,10 @@ begin
 end;
 $$;
 
-comment on function hymn.get_next_execution_time(text, timestamptz) is '输入cron表达式和上一次执行时间返回下一次执行时间';
+comment on function get_next_execution_time(text, timestamptz) is '输入cron表达式和上一次执行时间返回下一次执行时间';
 
 
-create or replace function hymn.filter_arr_in_range(source int[], min int, max int) returns int[]
+create or replace function filter_arr_in_range(source int[], min int, max int) returns int[]
     language plpgsql as
 $$
 declare
@@ -178,10 +178,10 @@ begin
     return arr;
 end;
 $$;
-comment on function hymn.filter_arr_in_range(int[], int, int) is '根据区间上界和下界过滤int数组，上界和下界为空';
+comment on function filter_arr_in_range(int[], int, int) is '根据区间上界和下界过滤int数组，上界和下界为空';
 
 
-create or replace function hymn.parse_cron_sub_expr_and_get_range(d_name text, expr text, lp int, rp int) returns int[]
+create or replace function parse_cron_sub_expr_and_get_range(d_name text, expr text, lp int, rp int) returns int[]
     language plpgsql
     immutable as
 $$
