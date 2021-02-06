@@ -15,7 +15,6 @@ create or replace function hymn.get_next_execution_time(cron text, last_exec_tim
 $$
 declare
     cron_item      text[]      := regexp_split_to_array(cron, '\s+');
-    now            timestamptz := now();
 --     上一次
     l_month        int         := extract(month from last_exec_time);
     l_day          int         := extract(day from last_exec_time);
@@ -78,7 +77,6 @@ begin
                 hymn.parse_cron_sub_expr_and_get_range('day_of_week', expr_dow, 0, 6),
                 null, null
             );
-        raise notice 'week %',a_week_day_arr;
         a_month_arr = hymn.filter_arr_in_range(
                 hymn.parse_cron_sub_expr_and_get_range('month', expr_month, 1, 12),
                 l_month, null
